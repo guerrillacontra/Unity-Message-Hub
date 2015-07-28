@@ -1,166 +1,121 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace IntrovertStudios.Messaging
 {
-	/// <summary>
-	/// A ceneralized hub where you can add/remove listeners that
-	/// are listening to messages (id based).
-	/// 
-	/// When a message is invoked, all listeners that are observing the id
-	/// will execute a callback function that looks like:
-	/// 
-	/// void OnSomethingHappened(object optionalData)
-	/// 
-	/// You can also Invoke messages on the next Update/FixedUpdate as long as the MessageHub prefab has
-	/// been installed.
-	/// 
-	/// Usage example:
-	/// 
-	/// //Enums are a clean way to represent message id's
-	/// enum UiMessage
-	/// {
-	/// 	ButtonClicked
-	/// }
-	/// 
-	/// //Listen for when a button has been clicked by the UI
-	/// MessageHub.AddListener((int)UiMessage.ButtonClicked, OnButtonClicked);
-	/// 
-	/// //The callback handler that simply prints what has been sent
-	/// private void OnButtonClicked(object data)
-	/// {
-	/// 	Debug.Log(data);
-	/// }
-	/// 
-	/// //Somewhere in your project a button has been clicked...
-	/// MessageHub.Invoke((int)UiMessage.ButtonClicked, "Hello World!");
-	/// 
-	/// BOOM all listeners will execute their handlers.
-	/// 
-	/// 
-	/// Tip : MonoBehaviour's that use this should Add/Remove there listeners on OnEnable and OnDisable
-	/// to not break hot-reload features in Unity.
-	/// </summary>
-	public sealed class MessageHub
-	{
 	
-		/// <summary>
-		/// Add a listener that will execute a callback when the message id has been invoked.
-		/// </summary>
-		public static void AddListener (int id, Action<object> callback)
-		{
-			if (!_listeners.ContainsKey (id)) {
-				_listeners.Add (id, new List<Action<object>> ());
-			}
+	/// <summary>
+	/// A message hub that should be used to represent a context (ie ui-interaction or enemies-and-player).
+	/// 
+	/// You could potentially derive this hub and create a Singleton so you can access your context's hub,
+	/// among other alternatives.
+	/// </summary>
+	public class MessageHub<TKey> : IMessageHub<TKey>
+	{
+		#region IMessageHub implementation
 
-			List<Action<object>> callbacks = _listeners [id];
-			callbacks.Add (callback);
+
+		public void Connect (TKey id, Action handler)
+		{
+			List<Action> connections = GetConnectionList(id);
+			connections.Add(handler);
 		}
 
-		/// <summary>
-		/// Removes the listener.
-		/// </summary>
-		public static void RemoveListener (int id, Action<object> callback)
+		public void Connect<T> (TKey id, Action<T> handler) where T : class
 		{
-			List<Action<object>> callbacks = _listeners [id];
-			callbacks.Remove (callback);
-
-			if (callbacks.Count == 0) {
-				_listeners.Remove (id);
-			}
-		}
-
-
-		/// <summary>
-		/// Post a message with some optional data to send to the listeners.
-		/// </summary>
-		public static void Post (int id, object data = null)
-		{
-			if(!_listeners.ContainsKey(id))
-			{
-				return;
-			}
-
-			List<Action<object>> callbacks = _listeners [id];
-
-			for(int i = 0; i < callbacks.Count;i++)
-			{
-				callbacks[i].Invoke(data);
-			}
-		}
-		/// <summary>
-		/// Post a message with optional data on the next update tick.
-		/// </summary>
-		public static void PostOnUpdate(int id, object data = null)
-		{
-			if(!_isPrefabInstalled)
-			{
-#if UNITY_EDITOR
-				Debug.LogWarning("Cannot invoke PostOnUpdate without the MessageHub prefab being installed.");
-#endif
-				return;
-			}
-
-			_updates.Add(new UpdateHook(){Id = id, Data = data});
-		}
-
-		/// <summary>
-		/// Post a message with optional data on the next fixed-update tick.
-		/// </summary>
-		public static void PostOnFixedUpdate(int id, object data = null)
-		{
-			if(!_isPrefabInstalled)
-			{
-#if UNITY_EDITOR
-				Debug.LogWarning("Cannot invoke PostOnFixedUpdate without the MessageHub prefab being installed.");
-#endif
-				return;
-			}
-
-			_fixed.Add(new UpdateHook(){Id = id, Data = data});
-		}
-
-
-
+			List<object> connections = GetTypedConnectionList(typeof(T), id);
 		
-		internal static void OnUpdate()
+			connections.Add(handler);
+		}
+
+		public void Disconnect (TKey id, Action handler)
 		{
-			for(int i = 0; i < _updates.Count;i++)
+			List<Action> connections = GetConnectionList(id);
+			connections.Remove(handler);
+		}
+
+		public void Disconnect <T>(TKey id, Action<T> handler) where T:class
+		{
+			List<object> connections = GetTypedConnectionList(typeof(T), id);
+
+			connections.Remove(handler);
+		}
+
+		public void DisconnectAll ()
+		{
+			_connections.Clear();
+			_typedConnections.Clear();
+		}
+
+		public void Post (TKey id)
+		{
+			List<Action> connections = GetConnectionList(id);
+
+			for(int i = 0; i < connections.Count;++i)
 			{
-				Post(_updates[i].Id, _updates[i].Data);
+				connections[i].Invoke();
 			}
-
-			_updates.Clear();
 		}
-		
-		internal static void OnFixedUpdate()
+
+		public void Post<T> (TKey id, T content) where T : class
 		{
-			for(int i = 0; i < _fixed.Count;i++)
+			List<object> connections = GetTypedConnectionList(typeof(T), id);
+
+			for(int i = 0; i < connections.Count;++i)
 			{
-				Post(_fixed[i].Id, _fixed[i].Data);
+				(connections[i] as Action<T>).Invoke(content);
 			}
-			
-			_fixed.Clear();
 		}
 
+		#endregion
 
-		struct UpdateHook
+
+		private List<Action> GetConnectionList(TKey id)
 		{
-			public int Id;
-			public object Data;
+			if(_connections.ContainsKey(id))return _connections[id];
+
+			List<Action> connections = new List<Action>();
+			_connections.Add(id, connections);
+
+
+			return connections;
 		}
 
 
-		static internal bool _isPrefabInstalled;
-
+		private List<object> GetTypedConnectionList(Type t, TKey id)
+		{
+			if(_typedConnections.ContainsKey(id))
+			{
+				Dictionary<Type, List<object>> sub = _typedConnections[id];
 		
-		//key -> Listener callback
-		private static Dictionary<int, List<Action<object>>> _listeners = new Dictionary<int, List<Action<object>>> ();
+				if(sub.ContainsKey(t))
+				{
+					return sub[t];
+				}
+
+				List<object> connections = new List<object>();
+				sub.Add(t, connections);
+				return connections;
+			}
+	
+			_typedConnections.Add(id, new Dictionary<Type, List<object>>());
+
+	
+			return GetTypedConnectionList(t, id);
+		}
 
 
-		private static List<UpdateHook> _updates = new List<UpdateHook>();
-		private static List<UpdateHook> _fixed = new List<UpdateHook>();
+	
+
+
+		//id -> Connection[]
+		private  Dictionary<TKey, List<Action>> _connections = new  Dictionary<TKey, List<Action>>();
+
+		//id -> type -> Connection[]
+		private  Dictionary<TKey, Dictionary<Type,List<object>>> _typedConnections = new Dictionary<TKey, Dictionary<Type, List<object>>>();
+
+	
+
 	}
 
 

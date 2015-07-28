@@ -6,29 +6,30 @@ namespace IntrovertStudios.Messaging.Example
 	{
 		[Range(1, 10)]
 		public float JumpPower = 1;
-
+		
 		void Awake()
 		{
 			_body = GetComponent<Rigidbody2D>();
 		}
-
+		
 		private Rigidbody2D _body;
-
+		
 		void OnEnable()
 		{
-			MessageHub.AddListener((int)MessageID.ButtonClicked, OnButtonClicked);
+			UiContext.Hub.Connect<string>(UiContext.MessageId.JumpButtonPressed, OnButtonClicked);
 		}
 
-
+		
 		void OnDisable()
 		{
-			MessageHub.RemoveListener((int)MessageID.ButtonClicked, OnButtonClicked);
+			if(UiContext.Hub != null)
+			UiContext.Hub.Disconnect<string>(UiContext.MessageId.JumpButtonPressed, OnButtonClicked);
 		}
-
-		private void OnButtonClicked(object data = null)
+		
+		private void OnButtonClicked(string content)
 		{
-			Debug.Log(data);
-
+			Debug.Log(content);
+			
 			_body.AddForce(new Vector2(0, JumpPower), ForceMode2D.Impulse);
 		}
 	}
