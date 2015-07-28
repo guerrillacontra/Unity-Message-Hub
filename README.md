@@ -49,7 +49,11 @@ Inside our player script we can listen for when the button press message arrives
 ```
 hub.Connect<string>(UiMessage.ButtonPressed, SayTheMessage);
 ```
-And this is what the delegate looks like:
+You may notice that Connect<string> is generic.
+
+This type is used to tell MessageHub what type of content your message will be attaching.
+
+The handler will look like:
 ```
 private void SayTheMessage(string content)
 {
@@ -57,8 +61,13 @@ private void SayTheMessage(string content)
   Debug.Log(content);
 }
 ```
+If you want to simply send a message with no content you could simply use:
+```
+hub.Connect(UiMessage.ButtonPressed, SayTheMessage);
+```
+However, your handler must have empty arguments as we have not specified a content type! 
 
-Done, when the message with a key 'UiMessage.ButtonPressed' is posted, the player will say the message for us.
+Done!. When the message with a key 'UiMessage.ButtonPressed' is posted, the player will say the message for us.
 
 #### Step 4 : Post
 
