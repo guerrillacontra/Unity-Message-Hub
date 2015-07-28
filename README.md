@@ -110,6 +110,7 @@ manner.
 4. Use hub.Disconnect to unhook from the hub and stop reacting to messages
 5. Use multiple Hubs for different contexts (ie UI output, Player output etc) as it can make it quicker to find issues while keeping a seperate key for different hubs.
 6. For simple games the GlobalHub works really well as an entire context
+7. Even though MessageHub performs well (and can be improved furthermore), I would not recommend posting messages every single frame as after all - it is event driven, not polled! Be smart with it :D
 
 
 
