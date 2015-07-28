@@ -2,8 +2,6 @@
 
 A fast, type-safe way to communicate between sub-systems for Unity 4.6+.
 
-You can download just the Asset Package [here](https://drive.google.com/file/d/0B-rWfhS_vt16cEZmeFFvVnFuX1E/view?usp=sharing).
-
 Features:
 
 1. Performance in mind (good for mobile)
@@ -43,7 +41,7 @@ Simple!
 ```
 IMessageHub<UiMessage> hub = new MessageHub<UiMessage>();
 ```
-This example will use a local variable to make it easy to show how it works however in practice, you may want to derive your own Singleton variation, or some kind of ServiceLocator so you can access your Hub outside of where it is creared.
+This example will use a local variable to make it easy to show how it works however in practice, you may want to derive your own Singleton variation, or some kind of ServiceLocator so you can access your Hub outside of where it is created.
 
 #### Step 3 : Listen
 
@@ -83,4 +81,8 @@ manner.
 
 
 Let me know what you think/feel and how I can improve MessageHub!
+
+ps:
+
+You can download just the Asset Package [here](https://drive.google.com/file/d/0B-rWfhS_vt16cEZmeFFvVnFuX1E/view?usp=sharing).
 
