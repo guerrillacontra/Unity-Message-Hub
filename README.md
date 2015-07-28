@@ -1,51 +1,86 @@
 # Unity Message Hub
 
-A small id based messaging system that allows gameobjects to communicate in a decoupled, event driven way.
+A fast, type-safe way to communicate between sub-systems for Unity 4.6+.
 
-Useful for when you need plug-in-and-play behaviour, or simply want to reduce the complexity of your code.
-
-Message Hub sends int based id's (as they are lightweight) as well as a single but optional object, to
-all of the listeners for that message id!
+You can download just the Asset Package [here](https://drive.google.com/file/d/0B-rWfhS_vt16cEZmeFFvVnFuX1E/view?usp=sharing).
 
 Features:
 
-1. Lightweight id based messages
-2. Add/Remove message listeners
-3. Defer callbacks to Update or FixedUpdate stages of the gameloop
-4. Easy to use, no dependencies!
+1. Performance in mind (good for mobile)
+2. Type safety. Both message content types AND message keys are typesafe so it's hard to make a mistake!
+3. Key based (of any type!) messaging so you can observe when a message is happening very simply
 
-##Example
+##How to use.
 
-We can represent our message id's via an enum or a standard int (I personally use enums as they are more readable).
+A brief introduction on how to use MessageHub in your Unity projects.
+
+###Scenario
+
+A GUI that has a button and when you click it you want the player to log a message, sent from the UI!
+
+#### Step 1 : Decide on a key
+
+For every MessageHub you create you will want to give it a type of 'key' so we can link messages to delegates.
+
+Luckily for you, MessageHub was written to allow you to use it in the most convenient way possible.
+
+Other messaging systems out there may force a specific type of message id, or attempt to be simplistic
+by using string/int primitives...
+
+...but that actually makes it fairly complex as your constantly looking in other source files to figure out what key's to use!
+
+In this example we are using an enum as it is very easy to use and light weight.
+
 ```
-enum MessageID
+enum UiMessage
 {
-  PlayButtonClicked
+  ButtonPressed
+}
+```
+Simple!
+
+#### Step 2 : Create your hub
+```
+IMessageHub<UiMessage> hub = new MessageHub<UiMessage>();
+```
+This example will use a local variable to make it easy to show how it works however in practice, you may want to derive your own Singleton variation, or some kind of ServiceLocator so you can access your Hub outside of where it is creared.
+
+#### Step 3 : Listen
+
+Inside our player script we can listen for when the button press message arrives and react to it!
+```
+hub.Connect<string>(UiMessage.ButtonPressed, SayTheMessage);
+```
+And this is what the delegate looks like:
+```
+private void SayTheMessage(string content)
+{
+  //'content' is what the UI has sent to the player!
+  Debug.Log(content);
 }
 ```
 
-When the play button is clicked in the UI controller, dispatch the message.
-```
-MessageBus.Post((int)MessageID.PlayButtonClicked);//Any observer will instantly execute their callback...
-```
-Our game manager can listen for the clicked message to launch our game.
-```
-MessageBus.AddListener((int)MessageID.PlayButtonClicked, StartTheGame);
+Done, when the message with a key 'UiMessage.ButtonPressed' is posted, the player will say the message for us.
 
-void StartTheGame(object optionalData = null)
-{
-  ...
-}
-```
-Done!
+#### Step 4 : Post
 
-Now everytime you click the play button the game will start - but both the UI and the Game have no idea that each other exist because they are using the MessageHub to decouple them.
+When our UI button is clicked, post the message to the Hub.
 
-You can add/remove as many listeners as you want per message, pass data around and all sorts.
+hub.Post<string>(UiMessage.ButtonPressed, "Hello World");
 
-If you need to use the PostOnUpdate or PostOnFixedUpdate features, simply add the MessageBus prefab to your scene
-and it will work with no hassle.
+#### Conclusion
+
+Hopefully you can see that MessageHub can decouple the interactions between different contexts in a clean, type-safe
+manner.
+
+
+## Tips
+
+1. Enums are brilliant for key representations...
+2. Check out the Example scene in the project and look at 'UiContext', I am using a ServiceLocator pattern which is a nice way to instance and access the Hub without needing to use Singletons
+3. It's always faster to Post messages that have no content. Try to limit how many 'content' messages you send.
 
 
 
+Let me know what you think/feel and how I can improve MessageHub!
 
