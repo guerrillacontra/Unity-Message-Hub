@@ -72,9 +72,10 @@ Done!. When the message with a key 'UiMessage.ButtonPressed' is posted, the play
 #### Step 4 : Post
 
 When our UI button is clicked, post the message to the Hub.
-
+```
 hub.Post<string>(UiMessage.ButtonPressed, "Hello World");
-
+```
+The player handler will instantly be triggered. :D
 #### Conclusion
 
 Hopefully you can see that MessageHub can decouple the interactions between different contexts in a clean, type-safe
@@ -86,6 +87,7 @@ manner.
 1. Enums are brilliant for key representations...
 2. Check out the Example scene in the project and look at 'UiContext', I am using a ServiceLocator pattern which is a nice way to instance and access the Hub without needing to use Singletons
 3. It's always faster to Post messages that have no content. Try to limit how many 'content' messages you send.
+4. Use hub.Disconnect to unhook from the hub and stop reacting to messages
 
 
 
