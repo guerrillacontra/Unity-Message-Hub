@@ -76,6 +76,26 @@ When our UI button is clicked, post the message to the Hub.
 hub.Post<string>(UiMessage.ButtonPressed, "Hello World");
 ```
 The player handler will instantly be triggered. :D
+
+### Going global
+
+So far I have shown you how to make context based Hubs but there is also a GlobalHub
+that works just like a MessageHub but is static and takes anything as a key.
+
+You can use it for everything in your game and completely ignore the MessageHub contexts, however I recommend
+using it for application communication.
+
+Like when the level changes and you want to tell everyone whats going on, or the application has paused and so should they!
+
+```
+GlobalHub.Connect(...);
+GlobalHub.Post(....);
+```
+
+The entire example project can be easily and quickly replaced with the GlobalHub.
+
+Should you do the same? Depends on the complexity of the game :)
+
 #### Conclusion
 
 Hopefully you can see that MessageHub can decouple the interactions between different contexts in a clean, type-safe
@@ -88,6 +108,8 @@ manner.
 2. Check out the Example scene in the project and look at 'UiContext', I am using a ServiceLocator pattern which is a nice way to instance and access the Hub without needing to use Singletons
 3. It's always faster to Post messages that have no content. Try to limit how many 'content' messages you send.
 4. Use hub.Disconnect to unhook from the hub and stop reacting to messages
+5. Use multiple Hubs for different contexts (ie UI output, Player output etc) as it can make it quicker to find issues while keeping a seperate key for different hubs.
+6. For simple games the GlobalHub works really well as an entire context
 
 
 
