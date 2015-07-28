@@ -11,20 +11,13 @@ namespace IntrovertStudios.Messaging.Example
 		{
 			_body = GetComponent<Rigidbody2D>();
 		}
-		
-		private Rigidbody2D _body;
-		
-		void OnEnable()
+
+		void Start()
 		{
 			UiContext.Hub.Connect<string>(UiContext.MessageId.JumpButtonPressed, OnButtonClicked);
 		}
-
 		
-		void OnDisable()
-		{
-			if(UiContext.Hub != null)
-			UiContext.Hub.Disconnect<string>(UiContext.MessageId.JumpButtonPressed, OnButtonClicked);
-		}
+		private Rigidbody2D _body;
 		
 		private void OnButtonClicked(string content)
 		{
