@@ -39,6 +39,8 @@ void StartTheGame(object optionalData = null)
 ```
 Done!
 
+Now everytime you click the play button the game will start - but both the UI and the Game have no idea that each other exist because they are using the MessageHub to decouple them.
+
 You can add/remove as many listeners as you want per message, pass data around and all sorts.
 
 If you need to use the PostOnUpdate or PostOnFixedUpdate features, simply add the MessageBus prefab to your scene
