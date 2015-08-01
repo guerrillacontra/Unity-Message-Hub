@@ -65,6 +65,8 @@ namespace IntrovertStudios.Messaging
 			{
 				(connections[i] as Action<T>).Invoke(content);
 			}
+			
+			Post(id);
 		}
 
 		#endregion
