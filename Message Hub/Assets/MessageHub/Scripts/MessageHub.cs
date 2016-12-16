@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace IntrovertStudios.Messaging
@@ -111,10 +111,10 @@ namespace IntrovertStudios.Messaging
 
 
 		//id -> Connection[]
-		private  Dictionary<TKey, List<Action>> _connections = new  Dictionary<TKey, List<Action>>();
+		private readonly Dictionary<TKey, List<Action>> _connections = new  Dictionary<TKey, List<Action>>();
 
 		//id -> type -> Connection[]
-		private  Dictionary<TKey, Dictionary<Type,List<object>>> _typedConnections = new Dictionary<TKey, Dictionary<Type, List<object>>>();
+		private readonly Dictionary<TKey, Dictionary<Type,List<object>>> _typedConnections = new Dictionary<TKey, Dictionary<Type, List<object>>>();
 
 	
 
