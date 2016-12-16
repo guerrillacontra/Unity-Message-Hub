@@ -55,7 +55,7 @@ namespace IntrovertStudios.Messaging
 		}
 
 	
-		private static MessageHub<object> _hub;
+		private static readonly MessageHub<object> _hub;
 
 
 	}
