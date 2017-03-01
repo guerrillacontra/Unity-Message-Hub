@@ -115,8 +115,3 @@ manner.
 
 
 Let me know what you think/feel and how I can improve MessageHub!
-
-ps:
-
-You can download just the Asset Package [here](https://drive.google.com/file/d/0B-rWfhS_vt16cEZmeFFvVnFuX1E/view?usp=sharing).
-
